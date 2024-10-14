@@ -9,13 +9,8 @@ from surya.postprocessing.heatmap import draw_bboxes_on_image
 
 from tabled.extract import extract_tables
 from tabled.formats import formatter
-from tabled.formats.markdown import markdown_format
-from tabled.inference.detection import detect_tables
-
-from tabled.assignment import assign_rows_columns
 from tabled.fileinput import load_pdfs_images
 from tabled.inference.models import load_detection_models, load_recognition_models
-from tabled.inference.recognition import get_cells, recognize_tables
 
 
 @click.command()

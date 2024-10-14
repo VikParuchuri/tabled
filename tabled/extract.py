@@ -23,7 +23,7 @@ def extract_tables(images, highres_images, text_lines, det_models, rec_models, s
     cells, needs_ocr = get_cells(table_imgs, table_bboxes, highres_image_sizes, table_text_lines, det_models[:2], detect_boxes=detect_boxes)
 
     table_rec = recognize_tables(table_imgs, cells, needs_ocr, rec_models)
-    cells = [assign_rows_columns(tr) for tr in table_rec]
+    cells = [assign_rows_columns(tr, im_size) for tr, im_size in zip(table_rec, highres_image_sizes)]
 
     results = []
     counter = 0

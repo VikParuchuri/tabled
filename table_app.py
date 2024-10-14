@@ -35,7 +35,7 @@ def run_table_rec(image, highres_image, text_line, models, skip_detection=False,
     cells, needs_ocr = get_cells(table_imgs, table_bboxes, highres_image_sizes, table_text_lines, models[0][:2], detect_boxes=detect_boxes)
 
     table_rec = recognize_tables(table_imgs, cells, needs_ocr, models[1])
-    cells = [assign_rows_columns(tr) for tr in table_rec]
+    cells = [assign_rows_columns(tr, im_size) for tr, im_size in zip(table_rec, highres_image_sizes)]
 
     out_data = []
     for idx, (cell, pred, table_img) in enumerate(zip(cells, table_rec, table_imgs)):

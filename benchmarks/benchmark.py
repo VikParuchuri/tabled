@@ -27,6 +27,7 @@ def main():
     results = []
     table_imgs = []
     table_blocks = []
+    image_sizes = []
     for i in range(len(ds)):
         row = ds[i]
         line_data = json.loads(row["text_lines"])
@@ -37,11 +38,12 @@ def main():
         table_block = get_table_blocks([table_bbox], line_data, image_size)[0]
         table_imgs.append(table_img)
         table_blocks.append(table_block)
+        image_sizes.append(image_size)
 
     start = time.time()
     table_rec = recognize_tables(table_imgs, table_blocks, [False] * len(table_imgs), rec_models)
     total_time = time.time() - start
-    cells = [assign_rows_columns(tr) for tr in table_rec]
+    cells = [assign_rows_columns(tr, im_size) for tr, im_size in zip(table_rec, image_sizes)]
 
     for i in range(len(ds)):
         row = ds[i]

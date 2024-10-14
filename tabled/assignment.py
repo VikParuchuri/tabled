@@ -3,6 +3,7 @@ from typing import List
 import numpy as np
 from surya.schema import TableResult, Bbox
 
+from tabled.heuristics import heuristic_layout
 from tabled.schema import SpanTableCell
 
 
@@ -227,11 +228,18 @@ def merge_multiline_rows(detection_result: TableResult, table_cells: List[SpanTa
     detection_result.rows = new_rows
 
 
-def assign_rows_columns(detection_result: TableResult) -> List[SpanTableCell]:
+def assign_rows_columns(detection_result: TableResult, image_size: list, heuristic_thresh=.6) -> List[SpanTableCell]:
     table_cells = initial_assignment(detection_result)
     merge_multiline_rows(detection_result, table_cells)
     table_cells = initial_assignment(detection_result)
     assign_overlappers(table_cells, detection_result)
+    total_unassigned = len([tc for tc in table_cells if tc.row_ids[0] is None or tc.col_ids[0] is None])
+    unassigned_frac = total_unassigned / max(len(table_cells), 1)
+
+    if unassigned_frac > heuristic_thresh:
+        table_cells = heuristic_layout(table_cells, image_size)
+        return table_cells
+
     assign_unassigned(table_cells, detection_result)
     handle_rowcol_spans(table_cells, detection_result)
     return table_cells

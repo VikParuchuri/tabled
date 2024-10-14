@@ -15,18 +15,13 @@ def align_rows(hypothesis, ref_row):
     best_alignment = []
     best_alignment_score = 0
     for j in range(0, len(hypothesis)):
-        hyp_row = hypothesis[j]
         alignments = []
         for i in range(len(ref_row)):
             if i >= len(hypothesis[j]):
                 alignments.append(0)
                 continue
-            max_cell_align = 0
-            for k in range(0, len(hyp_row)):
-                cell_align = fuzz.ratio(hyp_row[k], ref_row[i], score_cutoff=30) / 100
-                if cell_align > max_cell_align:
-                    max_cell_align = cell_align
-            alignments.append(max_cell_align)
+            alignment = fuzz.ratio(hypothesis[j][i], ref_row[i], score_cutoff=30) / 100
+            alignments.append(alignment)
         if len(alignments) == 0:
             continue
         alignment_score = sum(alignments) / len(alignments)

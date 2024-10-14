@@ -21,7 +21,7 @@ Tabled is a small library for detecting and extracting tables.  It uses [surya](
 
 ## Community
 
-[Discord](https://discord.gg//KuZwXNGnfH) is where we discuss future development.`
+[Discord](https://discord.gg//KuZwXNGnfH) is where we discuss future development.
 
 # Hosted API
 
@@ -87,26 +87,45 @@ pip install streamlit
 tabled_gui
 ```
 
+## From python
+
+```python
+from tabled.extract import extract_tables
+from tabled.fileinput import load_pdfs_images
+from tabled.inference.models import load_detection_models, load_recognition_models
+
+det_models, rec_models = load_detection_models(), load_recognition_models()
+images, highres_images, names, text_lines = load_pdfs_images(IN_PATH)
+
+page_results = extract_tables(images, highres_images, text_lines, det_models, rec_models)
+```
+
 # Benchmarks
 
-|   Avg score | Time per table (s) |   Total tables |
-|-------------|--------------------|----------------|
-|        0.91 | 0.03               |            688 |
+|   Avg score |   Time per table |   Total tables |
+|-------------|------------------|----------------|
+|       0.847 |            0.029 |            688 |
 
 ## Quality
 
 Getting good ground truth data for tables is hard, since you're either constrained to simple layouts that can be heuristically parsed and rendered, or you need to use LLMs, which make mistakes.  I chose to use GPT-4 table predictions as a pseudo-ground-truth.
 
-Tabled gets a `.91` alignment score when compared to GPT-4, which indicates alignment between the text in table rows/cells.  Some of the misalignments are due to GPT-4 mistakes, or small inconsistencies in what GPT-4 considered the borders of the table.  In general, extraction quality is quite high.
+Tabled gets a `.847` alignment score when compared to GPT-4, which indicates alignment between the text in table rows/cells.  Some of the misalignments are due to GPT-4 mistakes, or small inconsistencies in what GPT-4 considered the borders of the table.  In general, extraction quality is quite high.
 
 ## Performance
 
-Running on an A10G with 10GB of VRAM usage and batch size `64`, tabled takes `.03` seconds per table.
+Running on an A10G with 10GB of VRAM usage and batch size `64`, tabled takes `.029` seconds per table.
 
-## Running your own
+## Running the benchmark
 
 Run the benchmark with:
 
 ```shell
 python benchmarks/benchmark.py out.json
 ```
+
+# Acknowledgements
+
+- Thank you to [Peter Jansen](https://cognitiveai.org/) for the benchmarking dataset, and for discussion about table parsing.
+- Huggingface for inference code and model hosting
+- PyTorch for training/inference
