@@ -1,5 +1,6 @@
 from typing import List
 
+import numpy as np
 from surya.schema import TableResult, Bbox
 
 from tabled.schema import SpanTableCell
@@ -76,7 +77,7 @@ def initial_assignment(detection_result: TableResult, thresh=.5) -> List[SpanTab
     return cells
 
 
-def assign_overlappers(detection_result: TableResult, cells: List[SpanTableCell], thresh=.5):
+def assign_overlappers(cells: List[SpanTableCell], detection_result: TableResult, thresh=.5):
     overlapper_rows = overlapper_idxs(detection_result.rows, field="row_id")
     overlapper_cols = overlapper_idxs(detection_result.cols, field="col_id")
 
@@ -142,7 +143,7 @@ def assign_unassigned(table_cells: list, detection_result: TableResult):
             cell.col_ids = [closest_col]
 
 
-def handle_rowcol_spans(table_cells: list, detection_result: TableResult, thresh=.4):
+def handle_rowcol_spans(table_cells: list, detection_result: TableResult, thresh=.25):
     rotated = is_rotated(detection_result.rows, detection_result.cols)
     for cell in table_cells:
         for c in detection_result.cols:
@@ -152,6 +153,8 @@ def handle_rowcol_spans(table_cells: list, detection_result: TableResult, thresh
                 cell.col_ids.append(c.col_id)
             else:
                 break
+        # Assign to first column header appears in
+        cell.col_ids = sorted(cell.col_ids)
 
     for cell in table_cells:
         for r in detection_result.rows:
@@ -163,9 +166,72 @@ def handle_rowcol_spans(table_cells: list, detection_result: TableResult, thresh
                 break
 
 
+def merge_multiline_rows(detection_result: TableResult, table_cells: List[SpanTableCell]):
+    def find_row_gap(r1, r2):
+        return min([abs(r1.bbox[1] - r2.bbox[3]), abs(r2.bbox[1] - r1.bbox[3])])
+
+    all_cols = set([tc.col_ids[0] for tc in table_cells])
+    if len(all_cols) == 0:
+        return
+
+    merged_pairs = []
+    row_gaps = [
+        find_row_gap(r, r2)
+        for r, r2 in zip(detection_result.rows, detection_result.rows[1:])
+    ]
+    if len(row_gaps) == 0:
+        return
+
+    gap_thresh = np.median(row_gaps)
+
+    for idx, row in enumerate(detection_result.rows[1:]):
+        prev_row = detection_result.rows[idx - 1]
+        gap = find_row_gap(prev_row, row)
+
+        # Ensure the gap between r2 and r1 is small
+        if gap > gap_thresh:
+            continue
+
+        r1_cells = [tc for tc in table_cells if tc.row_ids[0] == prev_row.row_id]
+        r2_cells = [tc for tc in table_cells if tc.row_ids[0] == row.row_id]
+        r1_cols = set([tc.col_ids[0] for tc in r1_cells])
+        r2_cols = set([tc.col_ids[0] for tc in r2_cells])
+
+        # Ensure all columns in r2 are in r1
+        if len(r2_cols - r1_cols) > 0:
+            continue
+
+        # Ensure r2 has mostly blank cells
+        if len(r2_cols) / len(all_cols) > .5:
+            continue
+
+        merged_pairs.append((idx - 1, idx))
+
+    to_remove = set()
+    for r1_idx, r2_idx in merged_pairs:
+        detection_result.rows[r1_idx].bbox = [
+            min(detection_result.rows[r1_idx].bbox[0], detection_result.rows[r2_idx].bbox[0]),
+            min(detection_result.rows[r1_idx].bbox[1], detection_result.rows[r2_idx].bbox[1]),
+            max(detection_result.rows[r1_idx].bbox[2], detection_result.rows[r2_idx].bbox[2]),
+            max(detection_result.rows[r1_idx].bbox[3], detection_result.rows[r2_idx].bbox[3])
+        ]
+        to_remove.add(r2_idx)
+
+    new_rows = []
+    row_counter = 0
+    for idx, row in enumerate(detection_result.rows):
+        if idx not in to_remove:
+            row.row_id = row_counter
+            new_rows.append(row)
+            row_counter += 1
+    detection_result.rows = new_rows
+
+
 def assign_rows_columns(detection_result: TableResult) -> List[SpanTableCell]:
     table_cells = initial_assignment(detection_result)
-    assign_overlappers(detection_result, table_cells)
+    merge_multiline_rows(detection_result, table_cells)
+    table_cells = initial_assignment(detection_result)
+    assign_overlappers(table_cells, detection_result)
     assign_unassigned(table_cells, detection_result)
     handle_rowcol_spans(table_cells, detection_result)
     return table_cells

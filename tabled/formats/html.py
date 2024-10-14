@@ -6,15 +6,11 @@ from tabled.formats.common import sort_cells, replace_dots, replace_newlines
 from tabled.schema import SpanTableCell
 
 
-def replace_special_chars(text):
-    return text.replace("|", "\|").replace("-", "\-")
-
-
 def replace_all(text):
-    return replace_special_chars(replace_newlines(replace_dots(text)))
+    return replace_newlines(replace_dots(text))
 
 
-def markdown_format(cells: List[SpanTableCell]):
+def html_format(cells: List[SpanTableCell]):
     md_rows = []
     cells = sort_cells(cells)
     unique_rows = set([cell.row_ids[0] for cell in cells])
@@ -27,5 +23,5 @@ def markdown_format(cells: List[SpanTableCell]):
             md_row.append(cell)
         md_rows.append(md_row)
 
-    md = tabulate(md_rows, headers="firstrow", tablefmt="github", disable_numparse=True)
+    md = tabulate(md_rows, headers="firstrow", tablefmt="html", disable_numparse=True)
     return md

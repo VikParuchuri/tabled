@@ -15,10 +15,11 @@ def extract_tables(images, highres_images, text_lines, det_models, rec_models, s
         table_counts = [1] * len(highres_images)
 
     table_text_lines = []
+    highres_image_sizes = []
     for i, tc in enumerate(table_counts):
         table_text_lines.extend([text_lines[i]] * tc)
+        highres_image_sizes.extend([highres_images[i].size] * tc)
 
-    highres_image_sizes = [img.size for img in highres_images]
     cells, needs_ocr = get_cells(table_imgs, table_bboxes, highres_image_sizes, table_text_lines, det_models[:2], detect_boxes=detect_boxes)
 
     table_rec = recognize_tables(table_imgs, cells, needs_ocr, rec_models)

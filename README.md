@@ -1,8 +1,22 @@
 # Tabled
 
-Tabled is a small library for detecting and extracting tables.  It uses [surya](https://www.github.com/VikParuchuri/surya) to first find all the tables in a PDF, then identifies the rows/columns, and turns the cells into either markdown or html.
+Tabled is a small library for detecting and extracting tables.  It uses [surya](https://www.github.com/VikParuchuri/surya) to find all the tables in a PDF, identifies the rows/columns, and formats cells into markdown, csv, or html.
 
-## Examples
+## Example
+
+![Table image 0](static/images/table_example.png)
+
+
+| Characteristic     |       |       | Population   |       |       |       | Change from   2016 to 2060   |         |
+|--------------------|-------|-------|--------------|-------|-------|-------|------------------------------|---------|
+|                    | 2016  | 2020  | 2030         | 2040  | 2050  | 2060  | Number                       | Percent |
+| Total population   | 323.1 | 332.6 | 355.1        | 373.5 | 388.9 | 404.5 | 81.4                         | 25.2    |
+| Under 18 years     | 73.6  | 74.0  | 75.7         | 77.1  | 78.2  | 80.1  | 6.5                          | 8.8     |
+| 18 to 44 years     | 116.0 | 119.2 | 125.0        | 126.4 | 129.6 | 132.7 | 16.7                         | 14.4    |
+| 45 to 64 years     | 84.3  | 83.4  | 81.3         | 89.1  | 95.4  | 97.0  | 12.7                         | 15.1    |
+| 65 years and over  | 49.2  | 56.1  | 73.1         | 80.8  | 85.7  | 94.7  | 45.4                         | 92.3    |
+| 85 years and over  | 6.4   | 6.7   | 9.1          | 14.4  | 18.6  | 19.0  | 12.6                         | 198.1   |
+| 100 years and over | 0.1   | 0.1   | 0.1          | 0.2   | 0.4   | 0.6   | 0.5                          | 618.3   |
 
 
 ## Community
@@ -46,8 +60,11 @@ tabled DATA_PATH
 ```
 
 - `DATA_PATH` can be an image, pdf, or folder of images/pdfs
-- `--skip_detection` means that the images you pass in are all cropped tables and don't need any detection.
-- `--detect_boxes` by default, tabled will attempt to pull cell information out of the pdf.  If you instead want cells to be detected by a detection model, specify this (usually you only need this with pdfs that have bad embedded text).
+- `--format` specifies output format for each table (`markdown`, `html`, or `csv`)
+- `--save_json` saves additional row and column information in a json file
+- `--save_debug_images` saves images showing the detected rows and columns
+- `--skip_detection` means that the images you pass in are all cropped tables and don't need any table detection.
+- `--detect_cell_boxes` by default, tabled will attempt to pull cell information out of the pdf.  If you instead want cells to be detected by a detection model, specify this (usually you only need this with pdfs that have bad embedded text).
 - `--save_images` specifies that images of detected rows/columns and cells should be saved.
 
 The `results.json` file will contain a json dictionary where the keys are the input filenames without extensions.  Each value will be a list of dictionaries, one per page of the input document.  Each page dictionary contains:
@@ -68,4 +85,28 @@ I've included a streamlit app that lets you interactively try tabled on images o
 ```shell
 pip install streamlit
 tabled_gui
+```
+
+# Benchmarks
+
+|   Avg score | Time per table (s) |   Total tables |
+|-------------|--------------------|----------------|
+|        0.91 | 0.03               |            688 |
+
+## Quality
+
+Getting good ground truth data for tables is hard, since you're either constrained to simple layouts that can be heuristically parsed and rendered, or you need to use LLMs, which make mistakes.  I chose to use GPT-4 table predictions as a pseudo-ground-truth.
+
+Tabled gets a `.91` alignment score when compared to GPT-4, which indicates alignment between the text in table rows/cells.  Some of the misalignments are due to GPT-4 mistakes, or small inconsistencies in what GPT-4 considered the borders of the table.  In general, extraction quality is quite high.
+
+## Performance
+
+Running on an A10G with 10GB of VRAM usage and batch size `64`, tabled takes `.03` seconds per table.
+
+## Running your own
+
+Run the benchmark with:
+
+```shell
+python benchmarks/benchmark.py out.json
 ```

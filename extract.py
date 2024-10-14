@@ -8,6 +8,7 @@ import click
 from surya.postprocessing.heatmap import draw_bboxes_on_image
 
 from tabled.extract import extract_tables
+from tabled.formats import formatter
 from tabled.formats.markdown import markdown_format
 from tabled.inference.detection import detect_tables
 
@@ -23,8 +24,9 @@ from tabled.inference.recognition import get_cells, recognize_tables
 @click.option("--save_json", is_flag=True, help="Save row/column/cell information in json format")
 @click.option("--save_debug_images", is_flag=True, help="Save images for debugging")
 @click.option("--skip_detection", is_flag=True, help="Skip table detection")
-@click.option("--detect_boxes", is_flag=True, help="Detect table cell boxes vs extract from PDF.  Will also run OCR.")
-def main(in_path, out_folder, save_json, save_debug_images, skip_detection, detect_boxes):
+@click.option("--detect_cell_boxes", is_flag=True, help="Detect table cell boxes vs extract from PDF.  Will also run OCR.")
+@click.option("--format", type=click.Choice(["markdown", "csv", "html"]), default="markdown")
+def main(in_path, out_folder, save_json, save_debug_images, skip_detection, detect_cell_boxes, format):
     os.makedirs(out_folder, exist_ok=True)
     images, highres_images, names, text_lines = load_pdfs_images(in_path)
     pnums = []
@@ -37,26 +39,25 @@ def main(in_path, out_folder, save_json, save_debug_images, skip_detection, dete
 
         prev_name = name
 
-
     det_models = load_detection_models()
     rec_models = load_recognition_models()
 
-    page_results = extract_tables(images, highres_images, text_lines, det_models, rec_models, skip_detection=skip_detection, detect_boxes=detect_boxes)
+    page_results = extract_tables(images, highres_images, text_lines, det_models, rec_models, skip_detection=skip_detection, detect_boxes=detect_cell_boxes)
 
     out_json = defaultdict(list)
     for name, pnum, result in zip(names, pnums, page_results):
         for i in range(result.total):
             page_cells = result.cells[i]
             page_rc = result.rows_cols[i]
-            md = markdown_format(page_cells)
             img = result.table_imgs[i]
 
             base_path = os.path.join(out_folder, name)
             os.makedirs(base_path, exist_ok=True)
 
+            formatted_result, ext = formatter(format, page_cells)
             base_name = f"page{pnum}_table{i}"
-            with open(os.path.join(base_path, f"{base_name}.md"), "w") as f:
-                f.write(md)
+            with open(os.path.join(base_path, f"{base_name}.{ext}"), "w") as f:
+                f.write(formatted_result)
 
             img.save(os.path.join(base_path, f"{base_name}.png"))
 

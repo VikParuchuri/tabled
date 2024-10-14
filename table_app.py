@@ -23,7 +23,7 @@ def load_models():
     return load_detection_models(), load_recognition_models()
 
 
-def run_table_rec(image, highres_image, text_line, models, skip_detection=False):
+def run_table_rec(image, highres_image, text_line, models, skip_detection=False, detect_boxes=False):
     if not skip_detection:
         table_imgs, table_bboxes, _ = detect_tables([image], [highres_image], models[0])
     else:
@@ -32,7 +32,7 @@ def run_table_rec(image, highres_image, text_line, models, skip_detection=False)
 
     table_text_lines = [text_line] * len(table_imgs)
     highres_image_sizes = [highres_image.size] * len(table_imgs)
-    cells, needs_ocr = get_cells(table_imgs, table_bboxes, highres_image_sizes, table_text_lines, models[0][:2])
+    cells, needs_ocr = get_cells(table_imgs, table_bboxes, highres_image_sizes, table_text_lines, models[0][:2], detect_boxes=detect_boxes)
 
     table_rec = recognize_tables(table_imgs, cells, needs_ocr, models[1])
     cells = [assign_rows_columns(tr) for tr in table_rec]
@@ -83,6 +83,7 @@ Find the project [here](https://github.com/VikParuchuri/tabled).
 
 in_file = st.sidebar.file_uploader("PDF file or image:", type=["pdf", "png", "jpg", "jpeg", "gif", "webp"])
 skip_detection = st.sidebar.checkbox("Skip table detection", help="Use this if tables are already cropped (the whole PDF page or image is a table)", value=False)
+detect_boxes = st.sidebar.checkbox("Detect cell boxes", help="Detect table cell boxes vs extract from PDF.  Will also run OCR.", value=False)
 
 if in_file is None:
     st.stop()
@@ -116,12 +117,13 @@ with tempfile.NamedTemporaryFile(suffix=file_ext) as temp_input:
     temp_input.write(in_file.getvalue())
     temp_input.seek(0)
     filename = temp_input.name
-    images, highres_images, names, text_lines = load_pdfs_images(filename)
-    out_data = run_table_rec(images[page_number - 1], highres_images[page_number - 1], text_lines[page_number - 1], models, skip_detection=skip_detection)
+    images, highres_images, names, text_lines = load_pdfs_images(filename, max_pages=1, start_page=page_number - 1)
+    out_data = run_table_rec(images[0], highres_images[0], text_lines[0], models, skip_detection=skip_detection, detect_boxes=detect_boxes)
 
 for idx, (md, table_img) in enumerate(out_data):
     container.markdown(f"## Table {idx}")
     container.image(table_img, caption=f"Table {idx}", use_column_width="auto")
     container.markdown(md)
+    container.code(md)
     container.divider()
 

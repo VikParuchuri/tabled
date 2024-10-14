@@ -1,4 +1,4 @@
-from typing import List, Optional, Self, Any
+from typing import List, Optional, Any
 
 from pydantic import BaseModel, model_validator
 from surya.schema import Bbox, TableResult
@@ -45,7 +45,7 @@ class ExtractPageResult(BaseModel):
     table_imgs: List[Any]
 
     @model_validator(mode="after")
-    def check_cells(self) -> Self:
+    def check_cells(self):
         assert len(self.cells) == len(self.table_imgs), "Cells and table images must be the same length"
         assert len(self.cells) == len(self.rows_cols), "Cells and rows/cols must be the same length"
         return self
