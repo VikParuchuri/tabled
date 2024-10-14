@@ -13,7 +13,7 @@ from tabled.fileinput import load_pdfs_images
 from tabled.inference.models import load_detection_models, load_recognition_models
 
 
-@click.command()
+@click.command(help="Extract tables from PDFs")
 @click.argument("in_path", type=click.Path(exists=True))
 @click.argument("out_folder", type=click.Path())
 @click.option("--save_json", is_flag=True, help="Save row/column/cell information in json format")

@@ -2,6 +2,7 @@ import argparse
 import json
 import time
 
+import click
 import datasets
 from surya.input.pdflines import get_table_blocks
 from tabulate import tabulate
@@ -14,13 +15,14 @@ from tabled.inference.models import load_recognition_models
 from tabled.inference.recognition import recognize_tables
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Benchmark table conversion.")
-    parser.add_argument("out_file", help="Output filename for results")
-    parser.add_argument("--dataset", type=str, help="Dataset to use", default="vikp/table_bench2")
-    args = parser.parse_args()
-
-    ds = datasets.load_dataset(args.dataset, split="train")
+@click.command()
+@click.argument("out_file", type=str)
+@click.option("--dataset", type=str, default="vikp/table_bench2", help="Dataset to use")
+@click.option("--max", type=int, default=None, help="Max number of tables to process")
+def main(out_file, dataset, max):
+    ds = datasets.load_dataset(dataset, split="train")
+    if max:
+        ds = ds[:max]
 
     rec_models = load_recognition_models()
 
@@ -70,7 +72,7 @@ def main():
     print(table)
     print("Avg score computed by aligning table cell text with GPT-4 table cell text.")
 
-    with open(args.out_file, "w+") as f:
+    with open(out_file, "w+") as f:
         json.dump(results, f, indent=2)
 
 
