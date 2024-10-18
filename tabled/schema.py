@@ -12,6 +12,7 @@ class SpanTableCell(Bbox):
     text: str
     row_ids: List[Optional[int]]
     col_ids: List[Optional[int]]
+    order: Optional[int] = None
 
     def intersection_x_pct(self, other):
         if self.width == 0:
