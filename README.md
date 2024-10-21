@@ -67,16 +67,26 @@ tabled DATA_PATH
 - `--detect_cell_boxes` by default, tabled will attempt to pull cell information out of the pdf.  If you instead want cells to be detected by a detection model, specify this (usually you only need this with pdfs that have bad embedded text).
 - `--save_images` specifies that images of detected rows/columns and cells should be saved.
 
-The `results.json` file will contain a json dictionary where the keys are the input filenames without extensions.  Each value will be a list of dictionaries, one per page of the input document.  Each page dictionary contains:
+After running the script, the output directory will contain folders with the same basenames as the input filenames.  Inside those folders will be the markdown files for each table in the source documents.  There will also optionally be images of the tables.
 
-- `text_lines` - the detected text and bounding boxes for each line
-  - `text` - the text in the line
-  - `confidence` - the confidence of the model in the detected text (0-1)
-  - `polygon` - the polygon for the text line in (x1, y1), (x2, y2), (x3, y3), (x4, y4) format.  The points are in clockwise order from the top left.
-  - `bbox` - the axis-aligned rectangle for the text line in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.
-- `languages` - the languages specified for the page
-- `page` - the page number in the file
-- `image_bbox` - the bbox for the image in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.  All line bboxes will be contained within this bbox.
+There will also be a `results.json` file in the root of the output directory. The file will contain a json dictionary where the keys are the input filenames without extensions.  Each value will be a list of dictionaries, one per table in the document.  Each table dictionary contains:
+
+- `cells` - the detected text and bounding boxes for each table cell.
+  - `bbox` - bbox of the cell within the table bbox
+  - `text` - the text of the cell
+  - `row_ids` - ids of rows the cell belongs to
+  - `col_ids` - ids of columns the cell belongs to
+  - `order` - order of this cell within its assigned row/column cell.  (sort by row, then column, then order)
+- `rows` - bboxes of the detected rows
+  - `bbox` - bbox of the row in (x1, x2, y1, y2) format
+  - `row_id` - unique id of the row
+- `cols` - bboxes of detected columns
+  - `bbox` - bbox of the column in (x1, x2, y1, y2) format
+  - `col_id` - unique id of the column
+- `image_bbox` - the bbox for the image in (x1, y1, x2, y2) format.  (x1, y1) is the top left corner, and (x2, y2) is the bottom right corner.  The table bbox is relative to this.
+- `bbox` - the bounding box of the table within the image bbox.
+- `pnum` - page number within the document
+- `tnum` - table index on the page
 
 ## Interactive App
 
