@@ -6,8 +6,10 @@ from surya.ocr import run_recognition
 from surya.schema import TableResult
 from surya.tables import batch_table_recognition
 
+from tabled.settings import settings
 
-def get_cells(table_imgs, table_bboxes, image_sizes, text_lines, models, detect_boxes=False):
+
+def get_cells(table_imgs, table_bboxes, image_sizes, text_lines, models, detect_boxes=False, detector_batch_size=settings.DETECTOR_BATCH_SIZE):
     det_model, det_processor = models
     table_cells = []
     needs_ocr = []
@@ -27,7 +29,7 @@ def get_cells(table_imgs, table_bboxes, image_sizes, text_lines, models, detect_
 
     # Inference tables that need it
     if len(to_inference_idxs) > 0:
-        det_results = batch_text_detection([table_imgs[i] for i in to_inference_idxs], det_model, det_processor)
+        det_results = batch_text_detection([table_imgs[i] for i in to_inference_idxs], det_model, det_processor, batch_size=detector_batch_size)
         for idx, det_result in zip(to_inference_idxs, det_results):
             cell_bboxes = [{"bbox": tb.bbox, "text": None} for tb in det_result.bboxes]
             table_cells[idx] = cell_bboxes
@@ -35,7 +37,7 @@ def get_cells(table_imgs, table_bboxes, image_sizes, text_lines, models, detect_
     return table_cells, needs_ocr
 
 
-def recognize_tables(table_imgs, table_cells, needs_ocr: List[bool], models) -> List[TableResult]:
+def recognize_tables(table_imgs, table_cells, needs_ocr: List[bool], models, table_rec_batch_size=settings.TABLE_REC_BATCH_SIZE, ocr_batch_size=settings.RECOGNITION_BATCH_SIZE) -> List[TableResult]:
     table_rec_model, table_rec_processor, ocr_model, ocr_processor = models
 
     if sum(needs_ocr) > 0:
@@ -44,14 +46,14 @@ def recognize_tables(table_imgs, table_cells, needs_ocr: List[bool], models) -> 
         ocr_cells = [[c["bbox"] for c in cells] for cells, needs in zip(table_cells, needs_ocr) if needs]
         ocr_langs = [None] * len(ocr_images)
 
-        ocr_predictions = run_recognition(ocr_images, ocr_langs, ocr_model, ocr_processor, bboxes=ocr_cells)
+        ocr_predictions = run_recognition(ocr_images, ocr_langs, ocr_model, ocr_processor, bboxes=ocr_cells, batch_size=ocr_batch_size)
 
         # Assign text to correct spot
         for orig_idx, ocr_pred in zip(needs_ocr_idx, ocr_predictions):
             for ocr_line, cell in zip(ocr_pred.text_lines, table_cells[orig_idx]):
                 cell["text"] = ocr_line.text
 
-    table_preds = batch_table_recognition(table_imgs, table_cells, table_rec_model, table_rec_processor)
+    table_preds = batch_table_recognition(table_imgs, table_cells, table_rec_model, table_rec_processor, batch_size=table_rec_batch_size)
     return table_preds
 
 

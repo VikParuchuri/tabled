@@ -1,3 +1,4 @@
+import json
 from collections import defaultdict
 
 import pypdfium2
@@ -51,18 +52,21 @@ def main(in_path, out_folder, save_json, save_debug_images, skip_detection, dete
 
             formatted_result, ext = formatter(format, page_cells)
             base_name = f"page{pnum}_table{i}"
-            with open(os.path.join(base_path, f"{base_name}.{ext}"), "w") as f:
+            with open(os.path.join(base_path, f"{base_name}.{ext}"), "w+", encoding="utf-8") as f:
                 f.write(formatted_result)
 
             img.save(os.path.join(base_path, f"{base_name}.png"))
 
-            if save_json:
-                result = {
-                    "cells": [c.model_dump() for c in page_cells],
-                    "rows": [r.model_dump() for r in page_rc.rows],
-                    "cols": [c.model_dump() for c in page_rc.cols]
-                }
-                out_json[name].append(result)
+            res = {
+                "cells": [c.model_dump() for c in page_cells],
+                "rows": [r.model_dump() for r in page_rc.rows],
+                "cols": [c.model_dump() for c in page_rc.cols],
+                "bbox": result.bboxes[i].bbox,
+                "image_bbox": result.image_bboxes[i].bbox,
+                "pnum": pnum,
+                "tnum": i
+            }
+            out_json[name].append(res)
 
             if save_debug_images:
                 boxes = [l.bbox for l in page_cells]
@@ -79,6 +83,10 @@ def main(in_path, out_folder, save_json, save_debug_images, skip_detection, dete
                 rc_image = draw_bboxes_on_image(rows, rc_image, labels=row_labels, label_font_size=20, color="blue")
                 rc_image = draw_bboxes_on_image(cols, rc_image, labels=col_labels, label_font_size=20, color="red")
                 rc_image.save(os.path.join(base_path, f"{base_name}_rc.png"))
+
+    if save_json:
+        with open(os.path.join(out_folder, "result.json"), "w+", encoding="utf-8") as f:
+            json.dump(out_json, f, ensure_ascii=False)
 
 
 if __name__ == "__main__":

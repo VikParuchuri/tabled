@@ -44,6 +44,8 @@ class ExtractPageResult(BaseModel):
     cells: List[List[SpanTableCell]]
     rows_cols: List[TableResult]
     table_imgs: List[Any]
+    bboxes: List[Bbox] # Bbox of the table
+    image_bboxes: List[Bbox] # Bbox of the image/page table is inside
 
     @model_validator(mode="after")
     def check_cells(self):

@@ -3,6 +3,8 @@ from surya.layout import batch_layout_detection
 from surya.postprocessing.util import rescale_bbox
 from surya.schema import Bbox
 
+from tabled.settings import settings
+
 
 def merge_boxes(box1, box2):
     return [min(box1[0], box2[0]), min(box1[1], box2[1]), max(box1[2], box2[2]), max(box1[3], box2[3])]
@@ -30,10 +32,10 @@ def merge_tables(page_table_boxes):
     return [b for i, b in enumerate(page_table_boxes) if i not in ignore_boxes]
 
 
-def detect_tables(images, highres_images, models):
+def detect_tables(images, highres_images, models, detector_batch_size=settings.DETECTOR_BATCH_SIZE, layout_batch_size=settings.LAYOUT_BATCH_SIZE):
     det_model, det_processor, layout_model, layout_processor = models
-    line_predictions = batch_text_detection(images, det_model, det_processor)
-    layout_predictions = batch_layout_detection(images, layout_model, layout_processor, line_predictions)
+    line_predictions = batch_text_detection(images, det_model, det_processor, batch_size=detector_batch_size)
+    layout_predictions = batch_layout_detection(images, layout_model, layout_processor, line_predictions, batch_size=layout_batch_size)
 
     table_imgs = []
     table_counts = []
