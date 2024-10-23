@@ -31,7 +31,7 @@ def get_cells(table_imgs, table_bboxes, image_sizes, text_lines, models, detect_
     if len(to_inference_idxs) > 0:
         det_results = batch_text_detection([table_imgs[i] for i in to_inference_idxs], det_model, det_processor, batch_size=detector_batch_size)
         for idx, det_result in zip(to_inference_idxs, det_results):
-            cell_bboxes = [{"bbox": tb.bbox, "text": None} for tb in det_result.bboxes]
+            cell_bboxes = [{"bbox": tb.bbox, "text": None} for tb in det_result.bboxes if tb.area > 0]
             table_cells[idx] = cell_bboxes
 
     return table_cells, needs_ocr
