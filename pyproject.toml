@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tabled-pdf"
-version = "0.1.2"
+version = "0.1.3"
 description = "Detect and recognize tables in PDFs and images."
 authors = ["Vik Paruchuri <github@vikas.sh>"]
 readme = "README.md"
@@ -18,7 +18,7 @@ include = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-surya-ocr = "^0.6.6"
+surya-ocr = "^0.6.9"
 click = "^8.1.7"
 pypdfium2 = "^4.30.0"
 pydantic-settings = "^2.5.2"
