@@ -23,5 +23,6 @@ def html_format(cells: List[SpanTableCell]):
             md_row.append(cell)
         md_rows.append(md_row)
 
-    md = tabulate(md_rows, headers="firstrow", tablefmt="html", disable_numparse=True)
+    headers = "firstrow" if len(cells) > 1 else ""
+    md = tabulate(md_rows, headers=headers, tablefmt="html", disable_numparse=True)
     return md
