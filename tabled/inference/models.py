@@ -1,10 +1,10 @@
 from surya.model.detection.model import load_model as load_det_model, load_processor as load_det_processor
-from surya.model.layout.model import load_model as load_layout_model, load_processor as load_layout_processor
+from surya.model.layout.model import load_model as load_layout_model
+from surya.model.layout.processor import load_processor as load_layout_processor
 from surya.model.recognition.model import load_model as load_rec_model
 from surya.model.recognition.processor import load_processor as load_rec_processor
 from surya.model.table_rec.model import load_model as load_table_rec_model
 from surya.model.table_rec.processor import load_processor as load_table_rec_processor
-from surya.settings import settings as surya_settings
 
 
 def load_detection_models():
