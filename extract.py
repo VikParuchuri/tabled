@@ -1,7 +1,6 @@
 import json
 from collections import defaultdict
 
-import pypdfium2
 import copy
 import os
 

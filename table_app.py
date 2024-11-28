@@ -104,7 +104,7 @@ else:
     page_number = 1
 
 with col:
-    st.image(pil_image, caption="PDF file (preview)", use_column_width="auto")
+    st.image(pil_image, caption="PDF file (preview)", use_container_width=True)
 
     run_marker = st.sidebar.button("Run Tabled")
 
@@ -122,7 +122,7 @@ with tempfile.NamedTemporaryFile(suffix=file_ext) as temp_input:
 
 for idx, (md, table_img) in enumerate(out_data):
     container.markdown(f"## Table {idx}")
-    container.image(table_img, caption=f"Table {idx}", use_column_width="auto")
+    container.image(table_img, caption=f"Table {idx}", use_container_width=True)
     container.markdown(md)
     container.code(md)
     container.divider()

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tabled-pdf"
-version = "0.1.5"
+version = "0.1.6"
 description = "Detect and recognize tables in PDFs and images."
 authors = ["Vik Paruchuri <github@vikas.sh>"]
 readme = "README.md"
