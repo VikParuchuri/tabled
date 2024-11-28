@@ -32,10 +32,9 @@ def merge_tables(page_table_boxes):
     return [b for i, b in enumerate(page_table_boxes) if i not in ignore_boxes]
 
 
-def detect_tables(images, highres_images, models, detector_batch_size=settings.DETECTOR_BATCH_SIZE, layout_batch_size=settings.LAYOUT_BATCH_SIZE):
-    det_model, det_processor, layout_model, layout_processor = models
-    line_predictions = batch_text_detection(images, det_model, det_processor, batch_size=detector_batch_size)
-    layout_predictions = batch_layout_detection(images, layout_model, layout_processor, line_predictions, batch_size=layout_batch_size)
+def detect_tables(images, highres_images, models, layout_batch_size=settings.LAYOUT_BATCH_SIZE):
+    layout_model, layout_processor = models
+    layout_predictions = batch_layout_detection(images, layout_model, layout_processor, batch_size=layout_batch_size)
 
     table_imgs = []
     table_counts = []
