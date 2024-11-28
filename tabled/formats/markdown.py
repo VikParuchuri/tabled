@@ -7,7 +7,7 @@ from tabled.schema import SpanTableCell
 
 
 def replace_special_chars(text):
-    return text.replace("|", "\|").replace("-", "\-")
+    return text.replace("|", "\\|").replace("-", "\\-")
 
 
 def replace_all(text):
