@@ -1,4 +1,3 @@
-from surya.detection import batch_text_detection
 from surya.layout import batch_layout_detection
 from surya.postprocessing.util import rescale_bbox
 from surya.schema import Bbox

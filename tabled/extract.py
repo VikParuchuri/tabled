@@ -13,12 +13,13 @@ def extract_tables(
         highres_images,
         text_lines,
         det_models,
+        layout_models,
         rec_models,
         skip_detection=False,
         detect_boxes=False
 ) -> List[ExtractPageResult]:
     if not skip_detection:
-        table_imgs, table_bboxes, table_counts = detect_tables(images, highres_images, det_models)
+        table_imgs, table_bboxes, table_counts = detect_tables(images, highres_images, layout_models)
     else:
         table_imgs = highres_images
         table_bboxes = [[0, 0, img.size[0], img.size[1]] for img in highres_images]
@@ -30,7 +31,7 @@ def extract_tables(
         table_text_lines.extend([text_lines[i]] * tc)
         highres_image_sizes.extend([highres_images[i].size] * tc)
 
-    cells, needs_ocr = get_cells(table_imgs, table_bboxes, highres_image_sizes, table_text_lines, det_models[:2], detect_boxes=detect_boxes)
+    cells, needs_ocr = get_cells(table_imgs, table_bboxes, highres_image_sizes, table_text_lines, det_models, detect_boxes=detect_boxes)
 
     table_rec = recognize_tables(table_imgs, cells, needs_ocr, rec_models)
     cells = [assign_rows_columns(tr, im_size) for tr, im_size in zip(table_rec, highres_image_sizes)]

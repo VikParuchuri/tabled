@@ -8,9 +8,9 @@ from surya.model.table_rec.processor import load_processor as load_table_rec_pro
 
 
 def load_detection_models():
-    layout_model = load_layout_model()
-    layout_processor = load_layout_processor()
-    return layout_model, layout_processor
+    detection_model = load_det_model()
+    detection_processor = load_det_processor()
+    return detection_model, detection_processor
 
 
 def load_recognition_models():
@@ -19,3 +19,8 @@ def load_recognition_models():
     rec_model = load_rec_model()
     rec_processor = load_rec_processor()
     return table_rec_model, table_rec_processor, rec_model, rec_processor
+
+def load_layout_models():
+    layout_model = load_layout_model()
+    layout_processor = load_layout_processor()
+    return layout_model, layout_processor
