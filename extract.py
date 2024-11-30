@@ -10,7 +10,7 @@ from surya.postprocessing.heatmap import draw_bboxes_on_image
 from tabled.extract import extract_tables
 from tabled.formats import formatter
 from tabled.fileinput import load_pdfs_images
-from tabled.inference.models import load_detection_models, load_recognition_models
+from tabled.inference.models import load_detection_models, load_recognition_models, load_layout_models
 
 
 @click.command(help="Extract tables from PDFs")
@@ -36,8 +36,9 @@ def main(in_path, out_folder, save_json, save_debug_images, skip_detection, dete
 
     det_models = load_detection_models()
     rec_models = load_recognition_models()
+    layout_models = load_layout_models()
 
-    page_results = extract_tables(images, highres_images, text_lines, det_models, rec_models, skip_detection=skip_detection, detect_boxes=detect_cell_boxes)
+    page_results = extract_tables(images, highres_images, text_lines, det_models, layout_models, rec_models, skip_detection=skip_detection, detect_boxes=detect_cell_boxes)
 
     out_json = defaultdict(list)
     for name, pnum, result in zip(names, pnums, page_results):

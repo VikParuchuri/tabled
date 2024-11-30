@@ -102,12 +102,12 @@ tabled_gui
 ```python
 from tabled.extract import extract_tables
 from tabled.fileinput import load_pdfs_images
-from tabled.inference.models import load_detection_models, load_recognition_models
+from tabled.inference.models import load_detection_models, load_recognition_models, load_layout_models
 
-det_models, rec_models = load_detection_models(), load_recognition_models()
+det_models, rec_models, layout_models = load_detection_models(), load_recognition_models(), load_layout_models()
 images, highres_images, names, text_lines = load_pdfs_images(IN_PATH)
 
-page_results = extract_tables(images, highres_images, text_lines, det_models, rec_models)
+page_results = extract_tables(images, highres_images, text_lines, det_models, layout_models, rec_models)
 ```
 
 # Benchmarks

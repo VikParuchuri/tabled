@@ -15,24 +15,24 @@ import tempfile
 from PIL import Image
 
 import streamlit as st
-from tabled.inference.models import load_detection_models, load_recognition_models
+from tabled.inference.models import load_detection_models, load_recognition_models, load_layout_models
 
 
 @st.cache_resource()
 def load_models():
-    return load_detection_models(), load_recognition_models()
+    return load_detection_models(), load_recognition_models(), load_layout_models()
 
 
 def run_table_rec(image, highres_image, text_line, models, skip_detection=False, detect_boxes=False):
     if not skip_detection:
-        table_imgs, table_bboxes, _ = detect_tables([image], [highres_image], models[0])
+        table_imgs, table_bboxes, _ = detect_tables([image], [highres_image], models[2])
     else:
         table_imgs = [highres_image]
         table_bboxes = [[0, 0, highres_image.size[0], highres_image.size[1]]]
 
     table_text_lines = [text_line] * len(table_imgs)
     highres_image_sizes = [highres_image.size] * len(table_imgs)
-    cells, needs_ocr = get_cells(table_imgs, table_bboxes, highres_image_sizes, table_text_lines, models[0][:2], detect_boxes=detect_boxes)
+    cells, needs_ocr = get_cells(table_imgs, table_bboxes, highres_image_sizes, table_text_lines, models[0], detect_boxes=detect_boxes)
 
     table_rec = recognize_tables(table_imgs, cells, needs_ocr, models[1])
     cells = [assign_rows_columns(tr, im_size) for tr, im_size in zip(table_rec, highres_image_sizes)]
