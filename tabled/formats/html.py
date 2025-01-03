@@ -10,7 +10,7 @@ def replace_all(text):
     return replace_newlines(replace_dots(text))
 
 
-def html_format(cells: List[SpanTableCell]):
+def html_format(cells: List[SpanTableCell], **tabulate_kwargs):
     md_rows = []
     cells = sort_cells(cells)
     unique_rows = set([cell.row_ids[0] for cell in cells])
@@ -23,6 +23,8 @@ def html_format(cells: List[SpanTableCell]):
             md_row.append(cell)
         md_rows.append(md_row)
 
-    headers = "firstrow" if len(cells) > 1 else ""
-    md = tabulate(md_rows, headers=headers, tablefmt="html", disable_numparse=True)
+    if 'headers' not in tabulate_kwargs:
+        tabulate_kwargs['headers'] = "firstrow" if len(cells) > 1 else ""
+    
+    md = tabulate(md_rows, tablefmt="html", disable_numparse=True, **tabulate_kwargs)
     return md
