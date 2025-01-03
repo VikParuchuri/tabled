@@ -39,7 +39,7 @@ def run_table_rec(image, highres_image, text_line, models, skip_detection=False,
 
     out_data = []
     for idx, (cell, pred, table_img) in enumerate(zip(cells, table_rec, table_imgs)):
-        formatted_output = formatter(out_format, cell)[0]
+        formatted_output, _ = formatter(out_format, cell)
         out_data.append((formatted_output, table_img))
     return out_data
 
