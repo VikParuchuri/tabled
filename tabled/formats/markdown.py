@@ -14,7 +14,7 @@ def replace_all(text):
     return replace_special_chars(replace_newlines(replace_dots(text)))
 
 
-def markdown_format(cells: List[SpanTableCell]):
+def markdown_format(cells: List[SpanTableCell], **tabulate_kwargs):
     md_rows = []
     cells = sort_cells(cells)
     unique_rows = set([cell.row_ids[0] for cell in cells])
@@ -27,5 +27,8 @@ def markdown_format(cells: List[SpanTableCell]):
             md_row.append(cell)
         md_rows.append(md_row)
 
-    md = tabulate(md_rows, headers="firstrow", tablefmt="github", disable_numparse=True)
+    if 'headers' not in tabulate_kwargs:
+        tabulate_kwargs['headers'] = "firstrow"
+
+    md = tabulate(md_rows, tablefmt="github", disable_numparse=True, **tabulate_kwargs)
     return md
