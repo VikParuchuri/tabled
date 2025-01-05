@@ -112,7 +112,7 @@ def similarity_eval_html(pred, true, structure_only=False):
     else:
         return 0.0
 
-def TEDS_wrapper(prediction, ground_truth):
+def TEDS(prediction, ground_truth):
     prediction, ground_truth = wrap_table_html(prediction), wrap_table_html(ground_truth)
     if prediction:
         return similarity_eval_html(
@@ -122,9 +122,9 @@ def TEDS_wrapper(prediction, ground_truth):
     else:
         return 0.
 
-def TEDS(gts: List[str], preds: List[str], n_jobs:int=8):
+def batched_TEDS(gts: List[str], preds: List[str], n_jobs:int=16):
     with ThreadPoolExecutor(max_workers=n_jobs) as pool:
-        futures = [pool.submit(TEDS_wrapper, pred, gt) for pred, gt in zip(preds, gts)]
+        futures = [pool.submit(TEDS, pred, gt) for pred, gt in zip(preds, gts)]
 
     teds_scores = []
     for future in futures:

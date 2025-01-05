@@ -4,9 +4,9 @@ import click
 import datasets
 from tabulate import tabulate
 from bs4 import BeautifulSoup
-from rapidfuzz import fuzz
+from tqdm import tqdm
 
-from scoring import TEDS
+from scoring import batched_TEDS
 
 from tabled.assignment import assign_rows_columns
 from tabled.formats import formatter
@@ -21,7 +21,7 @@ from tabled.inference.recognition import recognize_tables, get_cells
 @click.option("--max", type=int, default=None, help="Max number of tables to process")
 def main(out_file, dataset, max):
     ds = datasets.load_dataset(dataset, split="train")
-    ds = ds.shuffle()
+    ds = ds.shuffle(seed=0)
 
     detection_models, rec_models= load_detection_models(), load_recognition_models()
 
@@ -33,7 +33,7 @@ def main(out_file, dataset, max):
     iterations = len(ds)
     if max is not None:
         iterations = min(max, len(ds))
-    for i in range(iterations):
+    for i in tqdm(range(iterations), desc='Preparing Inputs'):
         row = ds[i]
         table_img = row['highres_table_img']
         line_data = row['pdftext_lines']
@@ -58,16 +58,15 @@ def main(out_file, dataset, max):
 
         marker_table_html, _ = formatter("html", table_cells, numalign=None, stralign=None, headers="")
         marker_table_soup = BeautifulSoup(marker_table_html, 'html.parser')
-        marker_table_soup.find('tbody').unwrap()
+        marker_table_soup.find('tbody').unwrap()    #Tabulate wraps the table in <tbody> which fintabnet data doesn't
         marker_table_html = str(marker_table_soup)
         
-        print(fuzz.partial_ratio(marker_table_html, gt_table_html))
         results.append({
             "marker_table": marker_table_html,
             "gt_table": gt_table_html,
         })
 
-    scores = TEDS([r['gt_table'] for r in results], [r['marker_table'] for r in results])
+    scores = batched_TEDS([r['gt_table'] for r in results], [r['marker_table'] for r in results])
     for result, score in zip(results, scores):
         result.update({'score': score})
 
