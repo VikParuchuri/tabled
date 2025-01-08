@@ -18,7 +18,7 @@ include = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-surya-ocr = "~0.8.0"
+surya-ocr = "~0.9.0"
 click = "^8.1.7"
 pypdfium2 = "^4.30.0"
 pydantic-settings = "^2.5.2"

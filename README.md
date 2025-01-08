@@ -101,7 +101,7 @@ tabled_gui
 
 ```python
 from tabled.extract import extract_tables
-from tabled.fileinput import load_pdfs_images
+from tabled.input.fileinput import load_pdfs_images
 from tabled.inference.models import load_detection_models, load_recognition_models, load_layout_models
 
 det_models, rec_models, layout_models = load_detection_models(), load_recognition_models(), load_layout_models()

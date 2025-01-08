@@ -1,7 +1,7 @@
 import os
 
 from tabled.assignment import assign_rows_columns
-from tabled.fileinput import load_pdfs_images
+from tabled.input.fileinput import load_pdfs_images
 from tabled.formats.markdown import markdown_format
 from tabled.inference.detection import detect_tables
 from tabled.inference.recognition import get_cells, recognize_tables

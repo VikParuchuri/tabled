@@ -1,8 +1,6 @@
-from surya.layout import batch_layout_detection
 from surya.postprocessing.util import rescale_bbox
-from surya.schema import Bbox
-
 from tabled.settings import settings
+from surya.common.polygon import PolygonBox
 
 
 def merge_boxes(box1, box2):
@@ -24,16 +22,15 @@ def merge_tables(page_table_boxes):
                              page_table_boxes[i][2] * expansion_factor, page_table_boxes[i][3]]
             expanded_box2 = [page_table_boxes[j][0] * shrink_factor, page_table_boxes[j][1],
                              page_table_boxes[j][2] * expansion_factor, page_table_boxes[j][3]]
-            if Bbox(bbox=expanded_box1).intersection_pct(Bbox(bbox=expanded_box2)) > 0:
+            if PolygonBox(polygon=expanded_box1).intersection_pct(PolygonBox(polygon=expanded_box2)) > 0:
                 page_table_boxes[i] = merge_boxes(page_table_boxes[i], page_table_boxes[j])
                 ignore_boxes.add(j)
 
     return [b for i, b in enumerate(page_table_boxes) if i not in ignore_boxes]
 
 
-def detect_tables(images, highres_images, models, layout_batch_size=settings.LAYOUT_BATCH_SIZE):
-    layout_model, layout_processor = models
-    layout_predictions = batch_layout_detection(images, layout_model, layout_processor, batch_size=layout_batch_size)
+def detect_tables(images, highres_images, layout_predictor, layout_batch_size=settings.LAYOUT_BATCH_SIZE):
+    layout_predictions = layout_predictor(images, batch_size=layout_batch_size)
 
     table_imgs = []
     table_counts = []

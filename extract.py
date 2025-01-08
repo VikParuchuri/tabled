@@ -9,7 +9,7 @@ from surya.postprocessing.heatmap import draw_bboxes_on_image
 
 from tabled.extract import extract_tables
 from tabled.formats import formatter
-from tabled.fileinput import load_pdfs_images
+from tabled.input.fileinput import load_pdfs_images
 from tabled.inference.models import load_detection_models, load_recognition_models, load_layout_models
 
 
