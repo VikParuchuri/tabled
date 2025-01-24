@@ -1,3 +1,8 @@
+> [!IMPORTANT]
+> Tabled is now deprecated.  The functionality here has been migrated to [marker](https://github.com/vikParuchuri/marker).
+> To extract tables from a PDF with marker, you can run `python convert_single.py FILENAME --converter_cls marker.converters.table.TableConverter`
+> Read more, and see other CLI options [here](https://github.com/vikParuchuri/marker?tab=readme-ov-file#extract-tables).
+
 # Tabled
 
 Tabled is a small library for detecting and extracting tables.  It uses [surya](https://www.github.com/VikParuchuri/surya) to find all the tables in a PDF, identifies the rows/columns, and formats cells into markdown, csv, or html.
